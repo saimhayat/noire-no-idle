@@ -1,55 +1,5 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-const ShalwarKameezCanvas = lazy(() => import('./ShalwarKameezCanvas.jsx'));
-
-function GarmentDockVisual() {
-  const [isDesktop, setIsDesktop] = useState(() => (
-    typeof window === 'undefined' ? true : window.matchMedia('(min-width: 721px)').matches
-  ));
-
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 721px)');
-    const onChange = (event) => setIsDesktop(event.matches);
-    mq.addEventListener?.('change', onChange);
-    return () => mq.removeEventListener?.('change', onChange);
-  }, []);
-
-  // The second WebGL context is only created when the visitor is about a
-  // screen away from the promo, so it never competes with the first paint.
-  const dockRef = useRef(null);
-  const [near, setNear] = useState(false);
-  useEffect(() => {
-    const el = dockRef.current;
-    if (!el || near || typeof IntersectionObserver === 'undefined') { if (!near) setNear(true); return undefined; }
-    const io = new IntersectionObserver((entries) => {
-      if (entries.some((e) => e.isIntersecting)) { setNear(true); io.disconnect(); }
-    }, { rootMargin: '150% 0px' });
-    io.observe(el);
-    return () => io.disconnect();
-  }, [isDesktop, near]);
-
-  if (isDesktop) {
-    return (
-      <div className="promo__garment-dock" data-garment-dock="true" ref={dockRef}>
-        {near && <Suspense fallback={null}><ShalwarKameezCanvas staticRotationY={0} className="promo__garment-canvas" /></Suspense>}
-      </div>
-    );
-  }
-
-  return (
-    <picture className="promo__garment-dock" data-garment-dock="true">
-      <source media="(max-width: 720px)" srcSet="/garments/shalwar-kameez-mobile.webp" />
-      <img
-        src="/garments/shalwar-kameez.webp"
-        alt=""
-        width="984"
-        height="1492"
-        loading="eager"
-        decoding="async"
-      />
-    </picture>
-  );
-}
+import HomepageGarmentPreview from './HomepageGarmentPreview.jsx';
 
 /* The promo slot becomes the real home for the garment once the scroll
    transition arrives. The dock stays inside this section, so it cannot follow
@@ -60,7 +10,7 @@ export default function PromoBanner({ eyebrow, title, text, to, cta, image, imag
       <div className="promo__inner wrap">
         <div className={`promo__media ${garmentTarget ? 'promo__media--garment-target' : ''}`} data-garment-target={garmentTarget ? 'true' : undefined}>
           {garmentTarget ? (
-            <GarmentDockVisual />
+            <HomepageGarmentPreview />
           ) : (
             <img
               src={image}

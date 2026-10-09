@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { useReducedMotion } from 'framer-motion';
 import ShalwarKameezCanvas, { getModelPixelHeight } from './ShalwarKameezCanvas.jsx';
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
@@ -30,6 +31,7 @@ function layoutCenter(el) {
 
 export default function FloatingGarment() {
   const garmentRef = useRef(null);
+  const still = useReducedMotion();
   const modelStateRef = useRef({ rotationY: 0 });
   const [isDesktop, setIsDesktop] = useState(() => (
     typeof window === 'undefined' ? true : window.matchMedia('(min-width: 721px)').matches
@@ -43,6 +45,7 @@ export default function FloatingGarment() {
   }, []);
 
   useEffect(() => {
+    if (!isDesktop || still) return undefined;
     const garmentEl = garmentRef.current;
     const heroPlate = document.querySelector('.hero__plate');
     const garmentTarget = document.querySelector('[data-garment-target="true"]');
@@ -74,8 +77,9 @@ export default function FloatingGarment() {
       let endScale = 1;
       if (desktop.matches) {
         const cs = getComputedStyle(dockEl);
-        const dockW = dockEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-        const dockH = dockEl.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+        const stage = dockEl.querySelector('[data-garment-stage]');
+        const dockW = stage?.clientWidth || dockEl.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        const dockH = stage?.clientHeight || dockEl.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
         const floatPx = getModelPixelHeight(baseEl.offsetWidth, baseEl.offsetHeight);
         if (dockW > 0 && dockH > 0 && floatPx > 0) {
           endScale = getModelPixelHeight(dockW, dockH) / floatPx;
@@ -203,29 +207,16 @@ export default function FloatingGarment() {
       desktop.removeEventListener('change', onResize);
       resizeObserver?.disconnect();
     };
-  }, [isDesktop]);
+  }, [isDesktop, still]);
+
+  if (!isDesktop || still) return null;
 
   return (
     <div className="home__garment" aria-hidden="true">
       <div className="home__garment-float" ref={garmentRef}>
         <div className="home__garment-pointer">
           <div className="home__garment-visual">
-            {isDesktop ? (
-              <ShalwarKameezCanvas stateRef={modelStateRef} className="home__garment-canvas" />
-            ) : (
-              <picture className="home__garment-picture">
-                <source media="(max-width: 720px)" srcSet="/garments/shalwar-kameez-mobile.webp" />
-                <img
-                  className="home__garment-image"
-                  src="/garments/shalwar-kameez.webp"
-                  alt=""
-                  width="984"
-                  height="1492"
-                  loading="eager"
-                  decoding="async"
-                />
-              </picture>
-            )}
+            <ShalwarKameezCanvas stateRef={modelStateRef} className="home__garment-canvas" />
           </div>
         </div>
       </div>

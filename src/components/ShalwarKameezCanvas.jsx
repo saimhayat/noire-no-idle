@@ -81,23 +81,45 @@ function StudioEnvironment() {
    changing; a settled or hidden garment costs nothing. */
 const WakeContext = createContext(() => {});
 
-function TickerDriver({ needsRef }) {
+function TickerDriver({ needsRef, stateRef }) {
   const { advance } = useThree();
 
   useEffect(() => {
+    let last = performance.now();
     const tick = () => {
+      const now = performance.now();
+      const delta = Math.min((now - last) / 1000, 1 / 30);
+      last = now;
+      const state = stateRef?.current;
+      if (state?.active === false) return;
+      if (state?.autoRotate) {
+        state.rotationY += delta * 12;
+        needsRef.current = 3;
+      }
       if (needsRef.current <= 0) return;
       needsRef.current -= 1;
       advance(performance.now() / 1000, true);
     };
     gsap.ticker.add(tick);
     return () => gsap.ticker.remove(tick);
-  }, [advance, needsRef]);
+  }, [advance, needsRef, stateRef]);
 
   return null;
 }
 
-function GarmentModel({ stateRef, staticRotationY = 0 }) {
+function ContextGuard({ onError }) {
+  const { gl } = useThree();
+  useEffect(() => {
+    if (!onError) return undefined;
+    const canvas = gl.domElement;
+    const lost = (event) => { event.preventDefault(); onError(); };
+    canvas.addEventListener('webglcontextlost', lost);
+    return () => canvas.removeEventListener('webglcontextlost', lost);
+  }, [gl, onError]);
+  return null;
+}
+
+function GarmentModel({ stateRef, staticRotationY = 0, onReady }) {
   const gltf = useLoader(GLTFLoader, MODEL_URL);
   const groupRef = useRef(null);
   const wake = useContext(WakeContext);
@@ -137,7 +159,8 @@ function GarmentModel({ stateRef, staticRotationY = 0 }) {
       });
     });
     wake();
-  }, [scene, wake]);
+    onReady?.();
+  }, [scene, wake, onReady]);
 
   // let the page ask for a frame the moment the scroll target changes
   useEffect(() => {
@@ -153,7 +176,7 @@ function GarmentModel({ stateRef, staticRotationY = 0 }) {
 
     // Frame-rate independent (exponential) damping, with a clamped step so a
     // slow frame can never make the turn jump. Keep drawing until it settles.
-    if (Math.abs(current - targetRadians) < 2e-4) {
+    if (stateRef?.current?.immediate || Math.abs(current - targetRadians) < 2e-4) {
       groupRef.current.rotation.y = targetRadians;
     } else {
       groupRef.current.rotation.y = THREE.MathUtils.damp(current, targetRadians, 9, Math.min(delta, 1 / 30));
@@ -168,13 +191,15 @@ function GarmentModel({ stateRef, staticRotationY = 0 }) {
   );
 }
 
-export default function ShalwarKameezCanvas({ stateRef, staticRotationY = 0, className = '' }) {
+export default function ShalwarKameezCanvas({ stateRef, staticRotationY = 0, className = '', onReady, onError, fallback }) {
   const needsRef = useRef(3);
   const wake = useMemo(() => () => { needsRef.current = 3; }, []);
 
   return (
     <Canvas
       className={className}
+      fallback={fallback}
+      resize={{ scroll: false }}
       dpr={[1, 1.5]}
       orthographic
       camera={{ position: [0, 0, 10], zoom: 100, near: -50, far: 50 }}
@@ -188,7 +213,8 @@ export default function ShalwarKameezCanvas({ stateRef, staticRotationY = 0, cla
       }}
     >
       <WakeContext.Provider value={wake}>
-        <TickerDriver needsRef={needsRef} />
+        <ContextGuard onError={onError} />
+        <TickerDriver needsRef={needsRef} stateRef={stateRef} />
         <StableOrthoCamera />
         <StudioEnvironment />
         <ambientLight intensity={0.35} />
@@ -197,7 +223,7 @@ export default function ShalwarKameezCanvas({ stateRef, staticRotationY = 0, cla
         <directionalLight position={[-2.5, 1.5, 2]} intensity={0.8} />
         <directionalLight position={[0, 1.5, -3]} intensity={0.7} />
         <Suspense fallback={null}>
-          <GarmentModel stateRef={stateRef} staticRotationY={staticRotationY} />
+          <GarmentModel stateRef={stateRef} staticRotationY={staticRotationY} onReady={onReady} />
         </Suspense>
       </WakeContext.Provider>
     </Canvas>
