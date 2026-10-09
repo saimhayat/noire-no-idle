@@ -1,0 +1,76 @@
+/* ------------------------------------------------ fabric preview / studio ---- */
+
+.pdp__fabric { margin-block: clamp(2.5rem, 6vw, 5rem); }
+
+.fabric {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: clamp(1.25rem, 3vw, 3rem);
+  align-items: stretch;
+}
+.fabric--wait { min-height: 32rem; background: var(--paper-3); }
+
+.fabric__stage {
+  position: relative;
+  min-height: clamp(26rem, 62vh, 40rem);
+  background: radial-gradient(ellipse at 50% 38%, #fff 0%, var(--paper-3) 58%, var(--paper-4) 100%);
+  overflow: hidden;
+}
+.fabric__stage::after { /* a baked ground shadow */
+  content: '';
+  position: absolute;
+  left: 32%; right: 32%; bottom: 7%; height: 3.5%;
+  background: radial-gradient(ellipse at center, rgba(32, 28, 22, 0.18), rgba(32, 28, 22, 0) 70%);
+  pointer-events: none;
+}
+.fabricview { position: absolute; inset: 0; cursor: grab; touch-action: pan-y; outline: none; user-select: none; -webkit-user-select: none; }
+.fabricview:active { cursor: grabbing; }
+.fabricview:focus-visible { outline: 1.5px solid var(--ink); outline-offset: -4px; }
+.fabricview canvas { display: block; width: 100% !important; height: 100% !important; }
+.fabricview__hint {
+  position: absolute; left: 1rem; bottom: 1rem;
+  font-size: var(--fs-nano); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3);
+  pointer-events: none;
+}
+.fabric__loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink-3); font-size: var(--fs-micro); margin: 0; }
+.fabric__spin {
+  position: absolute; right: 1rem; bottom: 1rem; z-index: 2;
+  font: inherit; font-size: var(--fs-nano); letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.45rem 0.8rem; background: rgba(255, 255, 255, 0.8); border: 1px solid var(--line-loud); color: var(--ink); cursor: pointer;
+}
+.fabric__spin:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+.fabric__panel { display: flex; flex-direction: column; gap: 1.4rem; align-self: center; }
+.fabric__title { font-size: var(--fs-h3); line-height: 1.15; margin: 0.25rem 0 0; font-weight: 500; }
+.fabric__group { display: flex; flex-direction: column; gap: 0.6rem; }
+.fabric__label { font-size: var(--fs-nano); letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-3); }
+.fabric__chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.fabric__swatches { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.fabric__swatch {
+  position: relative; width: 2.1rem; height: 2.1rem; border-radius: 50%;
+  background: var(--sw, #ccc); border: 1px solid var(--line-loud); cursor: pointer; padding: 0;
+  box-shadow: inset 0 0 0 2px var(--paper);
+  transition: transform 0.15s ease;
+}
+.fabric__swatch:hover { transform: scale(1.08); }
+.fabric__swatch.is-on { outline: 1.5px solid var(--ink); outline-offset: 2px; }
+.fabric__swatch--photo { width: auto; min-width: 2.1rem; border-radius: 1.1rem; padding: 0 0.7rem; display: inline-flex; align-items: center; }
+.fabric__swatch--photo span { font-size: var(--fs-nano); letter-spacing: 0.06em; text-transform: uppercase; color: #fff; mix-blend-mode: difference; }
+.fabric__swatch--pick { display: grid; place-items: center; background: var(--paper-3); box-shadow: none; }
+.fabric__swatch--pick input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.fabric__swatch--pick span { font-size: 1.1rem; line-height: 1; color: var(--ink-2); }
+.fabric__inline { display: flex; align-items: center; justify-content: space-between; gap: 1rem; font-size: var(--fs-micro); color: var(--ink-2); }
+.fabric__inline input[type='color'] { width: 2.4rem; height: 1.7rem; padding: 0; border: 1px solid var(--line-loud); background: none; cursor: pointer; }
+.fabric__inline--range input { flex: 1; max-width: 14rem; accent-color: var(--ink); }
+.fabric__upload { position: relative; align-self: flex-start; cursor: pointer; margin-top: 0.4rem; }
+.fabric__upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.fabric__note { font-size: var(--fs-micro); color: var(--ink-3); max-width: 44ch; margin: 0; }
+
+.studio__pick { display: flex; flex-direction: column; gap: 0.5rem; max-width: 30rem; margin-bottom: 1.75rem; }
+.studio__pick select { font: inherit; padding: 0.75rem 0.9rem; border: 1px solid var(--line-loud); background: var(--paper); color: var(--ink); }
+.studio__cta { margin-top: 2rem; }
+
+@media (max-width: 860px) {
+  .fabric { grid-template-columns: 1fr; }
+  .fabric__stage { min-height: 24rem; }
+}
