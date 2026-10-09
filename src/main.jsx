@@ -12,6 +12,8 @@ import './styles/components.css';
 import './styles/commerce.css';
 import './styles/fabric.css';
 import './styles/brand.css';
+import './styles/responsive.css';
+import './styles/typography.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

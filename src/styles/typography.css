@@ -1,0 +1,70 @@
+/* Shared reading rhythm for the storefront and its written pages. */
+:root { --reading-width: 64ch; }
+
+.hero__copy, .shead__main, .promo__copy, .occasion__intro,
+.shop__title, .page__head, .page__body, .pinfo, .pdp__block,
+.post__body, .post-page__body, .fabric__panel, .footer__identity,
+.footer__grid {
+  min-width: 0;
+  text-align: start;
+}
+
+.section__title, .shead__title, .promo__title, .pinfo__title,
+.occasion__intro h2, .brand-note h2 {
+  line-height: 1.25;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+.page__head .section__title { max-width: 28ch; }
+.pinfo__title { max-width: 26ch; }
+.promo__title { max-width: 22ch; }
+.post__title, .fabric__title { line-height: 1.35; text-wrap: balance; }
+
+.hero__lede, .shead__text, .promo__text, .page__lede,
+.shop__lede, .pinfo__lede, .post__excerpt, .cathead__text,
+.occasion__intro p:last-child, .brand-note > p:not(.eyebrow) {
+  line-height: 1.7;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+.page__lede, .shop__lede { max-width: 54ch; }
+.prose p, .accordion__a, .pdp__desc p {
+  max-width: var(--reading-width);
+  line-height: 1.75;
+  text-align: start;
+  text-wrap: pretty;
+  overflow-wrap: break-word;
+}
+.prose__head, .pdp__subhead { line-height: 1.4; }
+.facts__row dt, .pdp__specs dt, .pinfo__notes dt { line-height: 1.5; }
+.facts__row dd, .pdp__specs dd, .pinfo__notes dd { line-height: 1.7; text-wrap: pretty; }
+.accordion__q { line-height: 1.5; }
+
+.card__name { min-height: 2.9em; text-wrap: pretty; overflow-wrap: break-word; }
+.card__price > span, .card__price > s, .pinfo__price > span,
+.pinfo__price > s, .checkout__totals dd, .drawer__foot dd {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.checkout__totals dd, .drawer__foot dd { text-align: end; }
+.line__name, .hit__name { line-height: 1.5; text-wrap: pretty; }
+.line__meta, .checkout__note, .account__note, .fabric__note,
+.contact-help p, .contact-help__note { line-height: 1.7; }
+.footer__grid h2 { line-height: 1.5; }
+.footer__link { line-height: 1.5; }
+
+@media (max-width: 600px) {
+  :root { --fs-body: 1rem; --fs-micro: .875rem; }
+  .eyebrow, .post__meta, .pinfo__label, .footer__grid h2 { letter-spacing: .1em; }
+  .shead { align-items: flex-start; }
+  .shead__main { flex: 1 1 100%; }
+  .shead__link { margin-top: .1rem; }
+  .prose { gap: .9rem; }
+  .prose__head { margin-bottom: 0; }
+  .post-page__foot { align-items: flex-start; gap: 1.25rem; }
+  .post-page__next { flex-basis: 100%; text-align: start; }
+  .account__links { flex-direction: column; align-items: flex-start; gap: .75rem; }
+  .footer__legal { flex-direction: column; align-items: flex-start; gap: .75rem; }
+  .footer__links { gap: 1.5rem; }
+}

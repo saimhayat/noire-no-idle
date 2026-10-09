@@ -223,6 +223,7 @@ export default function FabricViewer({ fabric, autoRotate = true, className = ''
       aria-label="3D garment, drag to turn it"
     >
       <Canvas
+        resize={{ scroll: false }}
         dpr={[1, 1.75]}
         camera={{ fov: 24, near: 0.05, far: 20, position: [0, 0, 3] }}
         gl={{ alpha: true, antialias: true, stencil: false, powerPreference: 'high-performance' }}

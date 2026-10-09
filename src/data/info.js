@@ -227,7 +227,7 @@ export const INFO = {
         heading: 'What is never collected',
         body: [
           'No analytics, no advertising identifiers, no account, no server-side log of your visit. The card fields on the checkout page are validated in your browser and discarded; nothing typed there is stored or transmitted.',
-          'Storefront photographs and fonts are served with this site. Some editorial pages still use external Pexels images, so that host sees those requests. The site has no newsletter subscription form.'
+          'Storefront and journal photographs and fonts are served with this site. The site has no newsletter subscription form.'
         ]
       }
     ]

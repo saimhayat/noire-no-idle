@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import Accordion from '../components/Accordion.jsx';
+import Accordion, { Disclosure } from '../components/Accordion.jsx';
 import Reveal, { RevealGroup, RevealItem } from '../components/Reveal.jsx';
 import ProductGallery from '../components/ProductGallery.jsx';
 import ProductInfo from '../components/ProductInfo.jsx';
@@ -47,7 +47,7 @@ export default function Product() {
   const { slug } = useParams();
   const ref = useRef(null);
   const navigate = useNavigate();
-  const { add } = useCart();
+  const { add, setOpen: setCartOpen } = useCart();
   const { has, toggle } = useWishlist();
   const { toast } = useToast() || {};
 
@@ -109,6 +109,7 @@ export default function Product() {
   };
   const onBuy = () => {
     add(product, size, colour || 'One Size', qty);
+    setCartOpen(false);
     navigate('/checkout');
   };
   const onSave = () => {
@@ -163,9 +164,11 @@ export default function Product() {
 
       {canPreview(product) && (
         <section className="pdp__fabric wrap" aria-label="Preview on a 3D model">
+          <Disclosure key={slug} title="Explore fabric in 3D" open={false} className="pdp__fabric-toggle">
           <Suspense fallback={<div className="fabric fabric--pdp fabric--wait" />}>
             <FabricStudio product={product} colourKey={colour} onColourKey={setColour} />
           </Suspense>
+          </Disclosure>
         </section>
       )}
 

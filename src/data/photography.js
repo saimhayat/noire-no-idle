@@ -6,14 +6,15 @@
 
    The shop photographs South Asian womenswear and menswear: kameez and trouser,
    lawn suits, embroidered formals, bridal, jutti and khussa, leather bags and
-   gold-plated jewellery. The set is free to use and hotlinked straight from the
-   photographer's CDN, so the shop carries no image weight of its own.
+   gold-plated jewellery. Published catalogue and journal images use local,
+   optimized WebP copies.
 
    `album('key')` returns the shot list for a piece, in gallery order: one to
    four frames, taken from the same sitting wherever the shoot had more than one
    angle, so a product page never mixes two different garments. */
 
 const LOCAL_PHOTOS = new Set(['12100636', '12165106', '12194309', '13536939', '14664890', '14972961', '15490163', '18544791', '19341050', '20614162', '20788490', '20788501', '22064197', '22064230', '22432991', '22434757', '22434764', '267301', '27046143', '27174557', '27204287', '27817076', '28213774', '28758558', '29169313', '29761842', '29761844', '31374289', '31861623', '31874430', '31874435', '32874211', '32934704', '32988532', '6387629', '6705270', '6705273', '6766246', '7956933', '8217705', '8344486', '8565796', '8692305', '9214975', '9323160', '9323161']);
+['20989158', '6765649', '12584788'].forEach(id => LOCAL_PHOTOS.add(id));
 const PX = (id, w = 1000) => LOCAL_PHOTOS.has(String(id)) ? `/photography/${id}.webp` : `https://images.pexels.com/photos/${id}/pexels-photo-${id}.jpeg?auto=compress&cs=tinysrgb&w=${w}`;
 const frames = (ids) => ids.map((id) => PX(id));
 

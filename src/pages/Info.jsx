@@ -33,6 +33,7 @@ function Block({ block }) {
     return (
       <section className="prose">
         <h3 className="prose__head">{block.heading}</h3>
+        <div className="table-scroll" role="region" aria-label={block.heading} tabIndex={0}>
         <table className="specs">
           <thead><tr>{block.cols.map((c) => <th key={c} scope="col">{c}</th>)}</tr></thead>
           <tbody>
@@ -45,6 +46,8 @@ function Block({ block }) {
             ))}
           </tbody>
         </table>
+        </div>
+        <p className="table-scroll__hint">Swipe sideways to see the full table.</p>
       </section>
     );
   }

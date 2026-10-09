@@ -41,11 +41,11 @@ export default function ProductGallery({ product, shot, setShot }) {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: DUR.base, ease: EASE }}
-            drag={still ? false : 'x'}
+            drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.12}
             dragDirectionLock
-            style={still ? undefined : { touchAction: 'pan-y' }}
+            style={{ touchAction: 'pan-y' }}
             onDragEnd={onDragEnd}
           />
         </AnimatePresence>

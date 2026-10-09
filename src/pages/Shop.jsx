@@ -36,7 +36,7 @@ const TITLES = {
 };
 
 const LEDES = {
-  Sale: 'Markdowns taken off the same price list as everything else — no invented before-prices, and no piece marked down twice.',
+  Sale: 'Reduced pieces across the wardrobe. Discover lawn, eastern wear and the details that complete your look.',
   Exclusive: 'Pieces bought whole and cut once for this shop. When the run closes, the pattern is filed.',
   Saved: 'Everything you have saved, in one place. It stays on this device until you take it off the list.',
   Everything: `${products.length} pieces across ${DEPARTMENTS.length} departments, kept in stock until the run closes.`
@@ -285,12 +285,11 @@ export default function Shop() {
             </>
           ) : (
             <div className="empty">
-              <h2 className="empty__title">Nothing matches those filters</h2>
+              <h2 className="empty__title">{state.wishlist && !ids.length ? 'Your wishlist is empty' : 'Nothing matches those filters'}</h2>
               <p className="empty__text">
-                The shop holds seventy-odd pieces, so it is usually one filter too many. Widen the
-                price, or clear the list and start again.
+                {state.wishlist && !ids.length ? 'Tap the heart on any piece to save it here for later.' : 'Try another size, colour or price range, or clear your filters to explore the collection.'}
               </p>
-              <button type="button" className="btn btn--solid" onClick={clear}>Clear all filters</button>
+              {state.wishlist && !ids.length ? <Link className="btn btn--solid" to="/shop">Explore the collection</Link> : <button type="button" className="btn btn--solid" onClick={clear}>Clear all filters</button>}
             </div>
           )}
         </div>

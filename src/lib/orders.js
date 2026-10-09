@@ -24,13 +24,5 @@ export const writeOrder = (order) => {
   return order;
 };
 
-/* An order is "on its way" for four days and then it is delivered; the shop has
-   no carrier feed to ask, so it says so honestly rather than pretending. */
-export const orderStatus = (order) => {
-  const placed = Date.parse(order.placedISO || '') || 0;
-  if (!placed) return 'Placed';
-  const days = (Date.now() - placed) / 864e5;
-  if (days < 1) return 'Being packed';
-  if (days < 4) return 'On its way';
-  return 'Delivered';
-};
+/* A local preview has no courier feed or fulfillment status. */
+export const orderStatus = () => 'Saved locally';

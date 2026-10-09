@@ -39,10 +39,10 @@ export default function Account() {
     <div className="page account wrap" ref={ref}>
       <header className="page__head">
         <p className="eyebrow">Your account</p>
-        <h1 className="section__title">Orders, saved pieces and what you looked at</h1>
+        <h1 className="section__title">Your orders &amp; saved pieces</h1>
         <p className="page__lede">
-          There is no sign-in here on purpose: the shop keeps your bag, your saved pieces and your
-          receipts on this device and nowhere else. Clearing your browser data clears all of it.
+          View your saved pieces, recently viewed items and order previews. These are stored
+          on this device. Clearing your browser data removes them.
         </p>
       </header>
 
@@ -83,7 +83,7 @@ export default function Account() {
                       <div className="total"><dt>Total</dt><dd>{money(o.total)}</dd></div>
                     </dl>
                     <p className="account__note">
-                      Shipping to {o.name}, {o.city}, {o.country}. Sent to {o.email}.
+                      Saved for {o.name}, {o.city}, {o.country}. Contact: {o.email}. This preview has not been sent to the shop.
                     </p>
                   </div>
                 )}

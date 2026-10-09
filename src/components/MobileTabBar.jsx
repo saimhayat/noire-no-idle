@@ -30,7 +30,7 @@ function Mark() {
   );
 }
 
-export default function MobileTabBar({ onSearch }) {
+export default function MobileTabBar({ onSearch, onBag }) {
   const { count, setOpen } = useCart();
   const wishlist = useWishlist();
   const { pathname, search } = useLocation();
@@ -53,7 +53,7 @@ export default function MobileTabBar({ onSearch }) {
         <Icon name="heart" />
         Saved{wishlist.count > 0 && <span className="tabbar__count">{wishlist.count}</span>}
       </Link>
-      <button type="button" className="tabbar__item" onClick={() => setOpen(true)}>
+      <button type="button" className="tabbar__item" onClick={onBag || (() => setOpen(true))}>
         <Icon name="bag" />
         Bag{count > 0 && <span className="tabbar__count">{count}</span>}
       </button>

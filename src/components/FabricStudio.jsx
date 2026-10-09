@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { COLOURS, colourName } from '../data/products.js';
 import { CLOTH_PRESETS } from '../data/cloth.js';
 import { PATTERNS, colourFromPhoto } from '../lib/fabric.js';
@@ -11,6 +12,7 @@ const hexOf = (key) => COLOURS[key]?.hex || '#cdc7ba';
    cloth and colourways (and follows the colour chosen above); in the studio it
    starts from whichever piece the customer picks, or from nothing at all. */
 export default function FabricStudio({ product = null, colourKey, onColourKey, variant = 'pdp' }) {
+  const still = useReducedMotion();
   const wrapRef = useRef(null);
   const [near, setNear] = useState(false);
   const [custom, setCustom] = useState(null); // a colour typed in by hand
@@ -21,7 +23,8 @@ export default function FabricStudio({ product = null, colourKey, onColourKey, v
   const [accent, setAccent] = useState('#f5f1e8');
   const [scale, setScale] = useState(1);
   const [upload, setUpload] = useState(null);
-  const [auto, setAuto] = useState(true);
+  const [auto, setAuto] = useState(() => !matchMedia('(prefers-reduced-motion: reduce)').matches);
+  useEffect(() => { if (still) setAuto(false); }, [still]);
 
   // mount the 3D canvas only once it is about to be seen
   useEffect(() => {

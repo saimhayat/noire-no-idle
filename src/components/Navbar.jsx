@@ -9,6 +9,7 @@ import MegaMenu from './MegaMenu.jsx';
 import MobileTabBar from './MobileTabBar.jsx';
 import SearchOverlay from './SearchOverlay.jsx';
 import { EASE } from '../lib/motion.js';
+import { useScrollLock } from '../hooks/useDialog.js';
 
 /* The drawer's list arrives in order: the departments walk in under each other
    rather than the whole sheet appearing at once. */
@@ -43,6 +44,11 @@ export default function Navbar() {
   const { count, setOpen: setCartOpen } = useCart();
   const wishlist = useWishlist();
   const { pathname, search } = useLocation();
+  useScrollLock(drawer);
+
+  const showSearch = () => { setDrawer(false); setOpen(null); setCartOpen(false); setSearching(true); };
+  const showCart = () => { setDrawer(false); setOpen(null); setSearching(false); setCartOpen(true); };
+  const toggleDrawer = () => { setSearching(false); setCartOpen(false); setDrawer(d => !d); };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -69,10 +75,16 @@ export default function Navbar() {
   }, [drawer]);
 
   // a route change closes whatever was open
-  useEffect(() => { setDrawer(false); setOpen(null); }, [pathname, search]);
+  useEffect(() => { setDrawer(false); setOpen(null); setExpanded(null); setSearching(false); setCartOpen(false); }, [pathname, search, setCartOpen]);
 
   useEffect(() => {
-    document.body.classList.toggle('no-scroll', drawer);
+    const desktop = matchMedia('(min-width: 1051px)');
+    const closeMobile = () => { if (desktop.matches) { setDrawer(false); setExpanded(null); } };
+    desktop.addEventListener('change', closeMobile);
+    return () => desktop.removeEventListener('change', closeMobile);
+  }, []);
+
+  useEffect(() => {
     const onKey = (e) => {
       if (e.key !== 'Escape') return;
       setDrawer(false);
@@ -89,7 +101,7 @@ export default function Navbar() {
       const tag = document.activeElement?.tagName;
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || document.activeElement?.isContentEditable) return;
       e.preventDefault();
-      setSearching(true);
+      showSearch();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -138,7 +150,7 @@ export default function Navbar() {
             <button
               type="button"
               className="hdr__burger"
-              onClick={() => setDrawer((d) => !d)}
+              onClick={toggleDrawer}
               aria-expanded={drawer}
               aria-controls="mobile-nav"
               aria-label={drawer ? 'Close menu' : 'Open menu'}
@@ -187,11 +199,11 @@ export default function Navbar() {
             </nav>
 
             <div className="hdr__tools">
-              <button type="button" className="hdr__tool" onClick={() => setSearching(true)} aria-label="Search the shop">
+              <button type="button" className="hdr__tool" onClick={showSearch} aria-label="Search the shop">
                 <Icon name="search" />
                 <span className="hdr__tool-text">Search</span>
               </button>
-              <Link to="/account" className="hdr__tool">
+              <Link to="/account" className="hdr__tool" aria-label="Your account">
                 <Icon name="user" />
                 <span className="hdr__tool-text">Account</span>
               </Link>
@@ -200,7 +212,7 @@ export default function Navbar() {
                 <span className="hdr__tool-text">Wishlist</span>
                 {wishlist.count > 0 && <span className="badge">{wishlist.count}</span>}
               </Link>
-              <button type="button" className="hdr__tool" onClick={() => setCartOpen(true)} aria-label={`Open bag, ${count} items`}>
+              <button type="button" className="hdr__tool" onClick={showCart} aria-label={`Open bag, ${count} items`}>
                 <Icon name="bag" />
                 <span className="hdr__tool-text">Bag</span>
                 {count > 0 && <motion.span key={count} className="badge" initial={{ scale: 1.5 }} animate={{ scale: 1 }}>{count}</motion.span>}
@@ -218,6 +230,7 @@ export default function Navbar() {
         {drawer && (
           <motion.nav
             id="mobile-nav"
+            data-lenis-prevent
             className="mdrawer"
             aria-label="Mobile"
             variants={DRAWER}
@@ -285,7 +298,7 @@ export default function Navbar() {
       </AnimatePresence>
 
       <SearchOverlay open={searching} onClose={() => setSearching(false)} />
-      <MobileTabBar onSearch={() => setSearching(true)} />
+      <MobileTabBar onSearch={showSearch} onBag={showCart} />
     </>
   );
 }

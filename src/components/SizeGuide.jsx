@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { SIZE_COLS, chartFor, sizeRows } from '../data/sizes.js';
+import useDialog from '../hooks/useDialog.js';
 
 /* The default chart is the shirt one — every other department passes its own, so
    a boot never gets a chest measurement. The table stays a table: this is
@@ -9,6 +10,8 @@ const DEFAULT_CHART = { cols: SIZE_COLS, rows: sizeRows, caption: 'Centimetres, 
 
 export function SizeTable({ chart = DEFAULT_CHART }) {
   return (
+    <>
+    <div className="table-scroll" role="region" aria-label={chart.title || 'Size measurements'} tabIndex={0}>
     <table className="specs specs--size">
       <caption className="specs__caption">{chart.caption}</caption>
       <thead>
@@ -26,6 +29,9 @@ export function SizeTable({ chart = DEFAULT_CHART }) {
         ))}
       </tbody>
     </table>
+    </div>
+    <p className="table-scroll__hint">Swipe sideways to see all measurements.</p>
+    </>
   );
 }
 
@@ -43,33 +49,32 @@ function Notes({ notes }) {
 /* The chart as a sheet, opened from a product page so the fit question is
    answered where it is asked. */
 export default function SizeGuide({ open, onClose, chart, department }) {
+  const still = useReducedMotion();
   const table = chart || chartFor(department) || DEFAULT_CHART;
 
-  useEffect(() => {
-    if (!open) return undefined;
-    const onKey = (e) => e.key === 'Escape' && onClose();
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onClose]);
+  const dialog = useDialog(open, onClose);
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
-          <motion.div className="scrim" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+          <motion.div className="scrim" data-lenis-prevent onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
           <motion.div
+            ref={dialog}
+            tabIndex={-1}
+            data-lenis-prevent
             className="sheet"
             role="dialog"
             aria-modal="true"
             aria-label={table.title || 'Size guide'}
-            initial={{ opacity: 0, y: 26, x: '-50%' }}
-            animate={{ opacity: 1, y: 0, x: '-50%' }}
-            exit={{ opacity: 0, y: 18, x: '-50%' }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            initial={still ? false : { opacity: 0, y: '-45%', x: '-50%' }}
+            animate={{ opacity: 1, y: '-50%', x: '-50%' }}
+            exit={{ opacity: 0, y: '-45%', x: '-50%' }}
+            transition={{ duration: still ? 0 : 0.35, ease: [0.22, 1, 0.36, 1] }}
           >
             <header className="sheet__head">
               <h2 className="sheet__title">{table.title || 'Size guide'}</h2>
-              <button type="button" onClick={onClose} aria-label="Close size guide">Esc</button>
+              <button type="button" onClick={onClose} aria-label="Close size guide">Close</button>
             </header>
             <div className="sheet__body">
               <SizeTable chart={table} />
@@ -78,6 +83,6 @@ export default function SizeGuide({ open, onClose, chart, department }) {
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>, document.body
   );
 }

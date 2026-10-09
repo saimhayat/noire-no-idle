@@ -5,6 +5,7 @@ import { LINK, STACK } from '../lib/motion.js';
 import { DEPARTMENTS, bestSellers, products } from '../data/products.js';
 import { clothByKey } from '../data/cloth.js';
 import { money } from '../lib/format.js';
+import useDialog from '../hooks/useDialog.js';
 
 const HINTS = ['Kurta', 'Kameez & Trouser', 'Juttis', 'Bags', 'Under Rs. 5,000'];
 const SUGGESTED = bestSellers(4);
@@ -19,17 +20,7 @@ export default function SearchOverlay({ open, onClose }) {
   const still = useReducedMotion();
   const [query, setQuery] = useState('');
   const [cursor, setCursor] = useState(0);
-
-  // the field is where the sheet starts
-  useEffect(() => {
-    if (!open) return undefined;
-    const id = window.setTimeout(() => field.current?.focus(), 60);
-    document.body.classList.add('no-scroll');
-    return () => {
-      window.clearTimeout(id);
-      document.body.classList.remove('no-scroll');
-    };
-  }, [open]);
+  const dialog = useDialog(open, onClose, field);
 
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -45,7 +36,6 @@ export default function SearchOverlay({ open, onClose }) {
   useEffect(() => {
     if (!open) return undefined;
     const onKey = (e) => {
-      if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
         e.preventDefault();
         setCursor((c) => Math.max(0, Math.min(results.length - 1, c + (e.key === 'ArrowDown' ? 1 : -1))));
@@ -61,6 +51,7 @@ export default function SearchOverlay({ open, onClose }) {
   };
 
   const pickHint = (h) => {
+    if (h === 'Under Rs. 5,000') { onClose(); navigate('/shop?max=5000'); return; }
     setQuery(h === '' ? '' : h);
     setCursor(0);
   };
@@ -69,16 +60,19 @@ export default function SearchOverlay({ open, onClose }) {
     <AnimatePresence>
       {open && (
         <>
-          <motion.div className="scrim" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+          <motion.div className="scrim" data-lenis-prevent onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
           <motion.div
+            ref={dialog}
+            tabIndex={-1}
+            data-lenis-prevent
             className="search"
             role="dialog"
             aria-modal="true"
             aria-label="Search products"
-            initial={{ opacity: 0, y: -24 }}
+            initial={still ? false : { opacity: 0, y: -24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -18 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: still ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
           >
             <div className="search__bar">
               <label className="search__label" htmlFor="site-search">Search the collection</label>
@@ -95,7 +89,7 @@ export default function SearchOverlay({ open, onClose }) {
                 }}
                 placeholder="Try “lawn”, “kurta”, “juttis”, “women”…"
               />
-              <button type="button" className="search__close" onClick={onClose} aria-label="Close search">Esc</button>
+              <button type="button" className="search__close" onClick={onClose} aria-label="Close search">Close</button>
             </div>
 
             {results.length > 0 && (
@@ -156,7 +150,7 @@ export default function SearchOverlay({ open, onClose }) {
                     </button>
                   ))}
                 </div>
-                <p className="search__hint">Bought most this week</p>
+                <p className="search__hint">Explore the edit</p>
                 <div className="search__hints">
                   {SUGGESTED.map((p) => (
                     <button key={p.id} type="button" className="chip" onClick={() => go(p.slug)}>{p.brand}</button>
@@ -169,7 +163,7 @@ export default function SearchOverlay({ open, onClose }) {
               <p className="drawer__empty">Nothing matches “{query.trim()}”. Try a cloth — lawn, khaddar, velvet — or a house, or a department.</p>
             )}
 
-            <p className="search__foot">Enter to open · ↑↓ to move · Esc to close</p>
+            <p className="search__foot"><span className="search__foot-keys">Enter to open · ↑↓ to move · Esc to close</span><span className="search__foot-touch">Tap a result to view the piece.</span></p>
           </motion.div>
         </>
       )}

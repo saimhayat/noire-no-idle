@@ -1,27 +1,24 @@
-import { useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import Quantity from './Quantity.jsx';
 import { FREE_SHIPPING, shippingFor, useCart } from '../context/CartContext.jsx';
 import { money } from '../lib/format.js';
+import useDialog from '../hooks/useDialog.js';
 
 export default function CartDrawer() {
   const { items, open, setOpen, setQty, remove, subtotal } = useCart();
   const navigate = useNavigate();
+  const still = useReducedMotion();
   const shipping = shippingFor(subtotal);
 
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && setOpen(false);
-    if (open) window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, setOpen]);
+  const dialog = useDialog(open, () => setOpen(false));
 
   return (
     <AnimatePresence>
       {open && (
         <>
-          <motion.div className="scrim" onClick={() => setOpen(false)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
-          <motion.aside className="drawer" role="dialog" aria-modal="true" aria-label="Shopping cart" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}>
+          <motion.div className="scrim" data-lenis-prevent onClick={() => setOpen(false)} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+          <motion.aside ref={dialog} tabIndex={-1} data-lenis-prevent className="drawer" role="dialog" aria-modal="true" aria-label="Shopping cart" initial={still ? false : { x: '100%' }} animate={{ x: 0 }} exit={still ? { opacity: 0 } : { x: '100%' }} transition={{ duration: still ? 0 : 0.5, ease: [0.22, 1, 0.36, 1] }}>
             <header className="drawer__head">
               <h2>Your cart</h2>
               <button type="button" onClick={() => setOpen(false)} aria-label="Close cart">Close</button>
@@ -29,7 +26,7 @@ export default function CartDrawer() {
             <ul className="drawer__list">
               {items.length === 0 && <li className="drawer__empty">Your cart is empty. Start with something from the new collection.</li>}
               {items.map((i, n) => (
-                <motion.li key={i.key} className="line" initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: n * 0.05 }}>
+                <motion.li key={i.key} className="line" initial={still ? false : { opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: still ? 0 : n * 0.05, duration: still ? 0 : 0.3 }}>
                   <img src={i.image} alt={i.name} width="80" height="100" />
                   <div>
                     <p className="line__name">{i.name}</p>

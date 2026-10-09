@@ -17,10 +17,10 @@ const EMPTY = {
 };
 
 const BLURB = {
-  email: 'We send the tracking number here.',
+  email: 'Email address for this order preview.',
   address: 'House, street and area.',
   postcode: 'Postal code, five digits.',
-  phone: 'The courier calls this number before delivery.',
+  phone: 'For example, 0300 1234567.',
   card: 'Any 16 digits — this is a demonstration, nothing is charged.',
   exp: 'MM/YY',
   cvc: '3 digits, 4 for Amex'
@@ -52,7 +52,7 @@ export default function Checkout() {
     const e = {};
     const v = values;
     if (which >= 1) {
-      if (!EMAIL.test(v.email.trim())) e.email = 'Enter an email we can send the tracking number to.';
+      if (!EMAIL.test(v.email.trim())) e.email = 'Enter a valid email address.';
       if (!v.first.trim()) e.first = 'Required.';
       if (!v.last.trim()) e.last = 'Required.';
       if (!v.address.trim()) e.address = 'Required.';
@@ -67,6 +67,7 @@ export default function Checkout() {
       if (!v.name.trim()) e.name = 'Required.';
     }
     setErrors(e);
+    if (Object.keys(e).length) requestAnimationFrame(() => document.getElementById(`f-${Object.keys(e)[0]}`)?.focus());
     return Object.keys(e).length === 0;
   };
 
@@ -74,7 +75,7 @@ export default function Checkout() {
     e.preventDefault();
     if (!check(1)) return;
     setStep(2);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
   };
 
   const place = (e) => {
@@ -97,7 +98,7 @@ export default function Checkout() {
     };
     writeOrder(order);
     clear();
-    toast?.(`Order ${order.id} placed — confirmation sent to ${order.email}`);
+    toast?.(`Order preview ${order.id} saved on this device`);
     navigate('/confirmation');
   };
 
@@ -132,7 +133,7 @@ export default function Checkout() {
       <div className="page wrap checkout">
         <div className="page__head">
           <h1 className="section__title">Your bag is empty</h1>
-          <p className="page__lede">Nothing to settle yet — seventy-odd pieces are still in stock.</p>
+          <p className="page__lede">Find your next favourite in the collection, then return here to review your bag.</p>
           <Link className="btn btn--solid" to="/shop">Back to the shop</Link>
         </div>
       </div>
@@ -152,6 +153,7 @@ export default function Checkout() {
         </ol>
       </div>
 
+      <p className="checkout__preview">Preview checkout: this saves an order on your device. No payment, delivery request or confirmation email is sent.</p>
       <div className="checkout__grid">
         <AnimatePresence mode="wait">
           {step === 1 ? (
@@ -227,12 +229,12 @@ export default function Checkout() {
                     </div>
                   </>
                 ) : (
-                  <p className="checkout__demo">Have Rs. {total.toLocaleString('en-PK')} ready for the courier. We call before we come.</p>
+                  <p className="checkout__demo">Cash on delivery selected. This preview records your choice; it does not arrange a delivery.</p>
                 )}
               </fieldset>
 
               <div className="checkout__actions">
-                <button type="submit" className="btn btn--solid">Place order — {money(total)}</button>
+                <button type="submit" className="btn btn--solid">Save order preview — {money(total)}</button>
                 <button type="button" className="btn btn--ghost" onClick={() => setStep(1)}>Back to delivery</button>
               </div>
             </motion.form>

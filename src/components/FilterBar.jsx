@@ -1,8 +1,10 @@
-import { useEffect } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
+import { useId } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import { Disclosure } from './Accordion.jsx';
 import { COLOURS } from '../data/products.js';
 import { figure } from '../lib/format.js';
+import useDialog from '../hooks/useDialog.js';
 
 /* One set of filter groups, printed twice: in the sidebar on a wide screen and
    in the bottom sheet on a phone. The markup is written once so the two can
@@ -23,6 +25,7 @@ function Group({ title, children, open = true }) {
 const inList = (list, value) => list.includes(value);
 
 export function FilterGroups({ facets, state, patch }) {
+  const departmentGroup = `${useId()}-department`;
   const toggle = (key, value) => {
     const next = inList(state[key], value) ? state[key].filter((v) => v !== value) : [...state[key], value];
     patch({ [key]: next });
@@ -34,7 +37,7 @@ export function FilterGroups({ facets, state, patch }) {
         <ul className="fopts">
           <li>
             <label className="fopt">
-              <input type="radio" name="department" checked={!state.department} onChange={() => patch({ department: '' })} />
+              <input type="radio" name={departmentGroup} checked={!state.department} onChange={() => patch({ department: '' })} />
               <span>Everything</span>
               <em>{figure(facets.total)}</em>
             </label>
@@ -42,7 +45,7 @@ export function FilterGroups({ facets, state, patch }) {
           {facets.departments.map((d) => (
             <li key={d.key}>
               <label className="fopt">
-                <input type="radio" name="department" checked={state.department === d.key} onChange={() => patch({ department: d.key })} />
+                <input type="radio" name={departmentGroup} checked={state.department === d.key} onChange={() => patch({ department: d.key })} />
                 <span>{d.key}</span>
                 <em>{figure(d.count)}</em>
               </label>
@@ -188,31 +191,26 @@ export default function FilterBar({ facets, state, patch, clear, activeCount, co
 /* The sheet: a phone gets the same controls, in a drawer it can thumb through,
    with the count on the button that closes it. */
 export function FilterSheet({ open, onClose, count, facets, state, patch, clear, activeCount }) {
-  useEffect(() => {
-    if (!open) return undefined;
-    const onKey = (e) => e.key === 'Escape' && onClose();
-    document.body.classList.add('no-scroll');
-    window.addEventListener('keydown', onKey);
-    return () => {
-      document.body.classList.remove('no-scroll');
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [open, onClose]);
+  const still = useReducedMotion();
+  const dialog = useDialog(open, onClose);
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
-          <motion.div className="scrim" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+          <motion.div className="scrim" data-lenis-prevent onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
           <motion.div
+            ref={dialog}
+            tabIndex={-1}
+            data-lenis-prevent
             className="bottomsheet"
             role="dialog"
             aria-modal="true"
             aria-label="Filters"
-            initial={{ y: '100%' }}
+            initial={still ? false : { y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
-            transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: still ? 0 : 0.42, ease: [0.22, 1, 0.36, 1] }}
           >
             <header className="bottomsheet__head">
               <h2>Filters</h2>
@@ -230,6 +228,6 @@ export function FilterSheet({ open, onClose, count, facets, state, patch, clear,
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>, document.body
   );
 }
