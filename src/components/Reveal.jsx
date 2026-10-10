@@ -1,4 +1,5 @@
-import { motion, useReducedMotion } from 'framer-motion';
+import { useRef } from 'react';
+import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { DUR, EASE, ITEM, STACK, VIEWPORT } from '../lib/motion.js';
 
 /* ---------------------------------------------------------------
@@ -51,23 +52,24 @@ export default function Reveal({ as = 'div', children, className, y = 18, delay 
   );
 }
 
-/* A rail: the parent holds the timing, the items hold their own place in it.
-   Children inherit the variant state from here, which is why a card only has to
-   say `variants={ITEM}` to take part. */
+/* Keep the entered state in `animate` so children added by Load more inherit
+   "show", even after the group's one-time entrance has finished. */
 export function RevealGroup({ as = 'div', children, className, stagger = 0.055, delay = 0.05, ...rest }) {
+  const ref = useRef(null);
+  const entered = useInView(ref, VIEWPORT);
   const still = useReducedMotion();
   if (still) {
     const Plain = as;
-    return <Plain className={className} {...rest}>{children}</Plain>;
+    return <Plain ref={ref} className={className} {...rest}>{children}</Plain>;
   }
   const Tag = MOTION[as] || motion.div;
   return (
     <Tag
+      ref={ref}
       className={className}
       variants={STACK(stagger, delay)}
       initial="hidden"
-      whileInView="show"
-      viewport={VIEWPORT}
+      animate={entered ? 'show' : 'hidden'}
       {...rest}
     >
       {children}
